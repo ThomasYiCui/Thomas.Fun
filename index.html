@@ -11,8 +11,8 @@
     <script>
         var c = document.getElementById("canvi");
         var ctx = c.getContext("2d");
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
+        c.width = window.innerWidth - 8;
+        c.height = window.innerHeight - 21;
         function fill(r, g, b) {
             ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ")";
         }
