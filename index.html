@@ -106,6 +106,9 @@
         var ballY = canvas.height - 80
         var ballGrav = 0;
         var ballMom = 0;
+        function floor(num) {
+            return Math.floor(num)
+        }
         function button(x, y, w, h, t, txt) {
             strokeWeight(3)
             eRect(x, y, w, h, (0, 0, 0))
@@ -217,13 +220,13 @@
                     }
                     
                     // up
-                    if (keys[87] || keys[38] && players[i][1] >= canvas.height - 70) {
+                    if (keys[87]  && players[i][1] >= canvas.height - 70 || keys[38] && players[i][1] >= canvas.height - 70) {
                         players[i][2] = -3;
                     }
                 } else {
-                    if(players[i][0] > ballX) {
+                    if(players[i][0] > 10 + i * 30 + (floor(i/5) * (canvas.width - 160))) {
                         players[i][0]-=1
-                    } else if(players[i][0] < ballX) {
+                    } else if(players[i][0] < 10 + i * 30 + (floor(i/5) * (canvas.width - 160))) {
                         players[i][0]+=1
                     } 
                 }
@@ -234,11 +237,19 @@
                     players[i][1] = canvas.height - 70
                     players[i][2] *= 0.3
                 }
+                for(var j = 0; j < players.length; j+=1) {
+                    if(players[j][0] >= players[i][0] && players[j][0] < players[i][0] + 15 && players[j][1] >= players[i][1] && players[j][1] < players[i][1] + 20 && i !== j) {
+                        if(players[i][0] < players[j][0]){
+                            players[i][0]-=(7.5 - (players[i][0] + 7.5 - (players[j][0] + 7.5)))/8
+                            players[j][0]-=(7.5 - (players[j][0] + 7.5 - (players[i][0] + 7.5)))/8
+                        } else {
+                            players[i][0]+=(7.5 - (players[i][0] + 7.5 - (players[j][0] + 7.5)))/8
+                            players[j][0]+=(7.5 - (players[j][0] + 7.5 - (players[i][0] + 7.5)))/8
+                        }
+                    }
+                }
                 rect(players[i][0], players[i][1], 15, 20)
             }
-        }
-        function updatePlay() {
-            
         }
         
         function drawHow() {
@@ -266,7 +277,6 @@
                 break;
                 case "play":
                     drawPlay();
-                    updatePlay()
                 break;
                 case "how":
                     drawHow()
