@@ -13,30 +13,197 @@
     <canvas id="canvi"></canvas>
     
     <script>
-        var c = document.getElementById("canvi");
-        var ctx = c.getContext("2d");
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
+        // makes it more like javascript
+        var canvas = document.getElementById("canvi");
+        var ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        var mouseX = 0;
+        var mouseY = 0;
+        var keys = []
+        var clicked = false
         function fill(r, g, b) {
             ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ")";
+        }
+        function stroke(r, g, b) {
+            ctx.strokeStyle = "rgb(" + r + ", " + g + ", " + b + ")";
         }
         function rect(x, y, w, h) {
             ctx.fillRect(x, y, w, h)
         }
-        function myFunction() {
+        function strokeWeight(s) {
+            ctx.lineWidth = s;
+        }
+        function eRect(x, y, w, h, col) {
+            ctx.beginPath();
+            stroke(col[0], col[1], col[2])
+            ctx.rect(x, y, w, h);
+            ctx.stroke()
+        }
+        function start() {
             myVar = setInterval(draw, 1);
         }
-        function text(txt, x, y) {
-            ctx.font = "30px Arial";
+        function text(txt, x, y, size) {
+            ctx.font = size + "px Arial";
             ctx.fillText(txt, x, y);
         }
-        function draw() { 
-            fill(50, 50, 50)
-            rect(0, 0, c.width, c.height)
+        function textAlign(align) {
+            ctx.textAlign = align
+        }
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+        function dist2(a, b, d) {
+            return (a - b) > -d && (a - b) < d
+        }
+        canvas.addEventListener("mousemove", function(e) { 
+            var cRect = canvas.getBoundingClientRect();
+            mouseX = Math.round(e.clientX - cRect.left);
+            mouseY = Math.round(e.clientY - cRect.top);
+        });
+        canvas.addEventListener("mousedown", function(e) {
+            clicked = true
+        }, false);
+        canvas.addEventListener("keydown", function(e) {
+            keys.push(e.keycode)
+        }, false);
+        
+        // game
+        var menu = {
+            BBy: -20,
+            Bx: -200,
+            B2x: canvas.width + 10,
+            B3x: -200,
+        }
+        var score = [0, 0]
+        var scene = "menu"
+        var players = []
+        function button(x, y, w, h, t, txt) {
+            strokeWeight(3)
+            eRect(x, y, w, h, (0, 0, 0))
+            textAlign("center")
+            text(txt[0], x + w/2, y + h/2 + txt[1]/4, txt[1])
+            if(mouseX > x && mouseY > y && mouseX < x + w && mouseY < y + h && clicked) {
+                t();
+            }
+        }
+        
+        function drawMenu() {
+            fill(194, 103, 0);
+            rect(0, 0, canvas.width, canvas.height);
+            fill(0, 0, 0);
+            textAlign("center");
+            text("BasketBall", canvas.width/2, menu.BBy, 50);
+            button(menu.Bx, 100, 100, 50, function() {
+                    scene = "play"
+                    menu = {
+                        BBy: -20,
+                        Bx: -200,
+                        B2x: canvas.width + 10,
+                        B3x: -200,
+                    }
+                    players = []
+                    for(var i = 0; i < 5; i+=1) {
+                        players.push([35 + i * 20])
+                    }
+                    for(var i = 0; i < 5; i+=1) {
+                        players.push([canvas.width - (50 + i * 20)])
+                    }
+            }, ["Play", 30])
+            button(menu.B2x, 175, 100, 50, function() {
+                    scene = "how"
+                    menu = {
+                        BBy: -20,
+                        Bx: -200,
+                        B2x: canvas.width + 10,
+                        B3x: -200,
+                    }
+            }, ["How", 30])
+            button(menu.B3x, 250, 100, 50, function() {
+                    scene = "credits"
+                    menu = {
+                        BBy: -20,
+                        Bx: -200,
+                        B2x: canvas.width + 10,
+                        B3x: -200,
+                    }
+            }, ["Credits", 30])
+        }
+        function updateMenu() {
+            if(menu.BBy <= 49) {
+                menu.BBy = lerp(menu.BBy, 50, 0.01);
+            }
+            if(menu.BBy > 45) {
+                menu.Bx = lerp(menu.Bx, canvas.width/2 - 50, 0.01);
+            }
+            if(dist2(menu.Bx, canvas.width/2 - 50, 5)){
+                menu.B2x = lerp(menu.B2x, canvas.width/2 - 50, 0.01);
+            }
+            if(dist2(menu.B2x, canvas.width/2 - 50, 5)){
+                menu.B3x = lerp(menu.B3x, canvas.width/2 - 50, 0.01);
+            }
+        }
+        
+        function drawPlay() {
+            fill(194, 103, 0);
+            rect(0, 0, canvas.width, canvas.height);
+            textAlign("center")
             fill(0, 0, 0)
-            text("Hello Pop", 200, 126)
+            text(score[0] + "/" + score[1], canvas.width/2, 40, 40)
+            fill(143, 76, 1)
+            rect(0, canvas.height - 50, canvas.width, 50)
+            for(var i = 0; i < players.length; i+=1) {
+                if(i < 5) {
+                    fill(0, 0, 255)
+                } else {
+                    fill(255, 0, 0)
+                }
+                rect(players[i][0], canvas.height - 75, 15, 25)
+            }
+        }
+        function updatePlay() {
+            
+        }
+        
+        function drawHow() {
+            fill(194, 103, 0);
+            rect(0, 0, canvas.width, canvas.height);
+            fill(0, 0, 0)
+            button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
+                    scene = "menu"
+            }, ["Back", 30])
+        }
+        
+        function drawCredits() {
+            fill(194, 103, 0);
+            rect(0, 0, canvas.width, canvas.height);
+            fill(0, 0, 0)
+            button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
+                    scene = "menu"
+            }, ["Back", 30])
+        }
+        function draw() { 
+            switch(scene) {
+                case "menu":
+                    drawMenu();
+                    updateMenu()
+                break;
+                case "play":
+                    drawPlay();
+                    updatePlay()
+                break;
+                case "how":
+                    drawHow()
+                break;
+                case "credits":
+                    drawCredits()
+                break;
+            }
+            clicked = false;
         }
         draw()
+        start()
+        
     </script>
     
     </body>
