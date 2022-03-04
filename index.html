@@ -132,10 +132,10 @@
                     }
                     players = []
                     for(var i = 0; i < 5; i+=1) {
-                        players.push([35 + i * 20])
+                        players.push([35 + i * 20, canvas.height - 80, 0])
                     }
                     for(var i = 0; i < 5; i+=1) {
-                        players.push([canvas.width - (50 + i * 20)])
+                        players.push([canvas.width - (50 + i * 20), canvas.height - 80, 0])
                     }
             }, ["Play", 30])
             button(menu.B2x, 175, 100, 50, function() {
@@ -182,6 +182,12 @@
             rect(0, canvas.height - 50, canvas.width, 50)
             fill(235, 124, 0)
             ellipse(ballX, ballY, 10, 10, 0, 'brown');
+            fill(100, 100, 100)
+            rect(10, canvas.height - 150, 10, 100)
+            rect(canvas.width - 20, canvas.height - 150, 10, 100)
+            fill(255, 255, 255)
+            rect(10, canvas.height - 175, 10, 25)
+            rect(canvas.width - 20, canvas.height - 175, 10, 25)
             if(ballY < canvas.height - 60) {
                 ballGrav+=0.01;
             } else {
@@ -191,6 +197,8 @@
             ballY+=ballGrav;
             ballX+=ballMom;
             for(var i = 0; i < players.length; i+=1) {
+                fill(252, 190, 121)
+                ellipse(players[i][0] + 7, players[i][1] - 10, 7.5, 7.5, 0, (252, 190, 121));
                 if(i < 5) {
                     fill(0, 0, 255)
                 } else {
@@ -207,6 +215,11 @@
                     if (keys[68] || keys[39]) {
                         players[i][0] += 1;
                     }
+                    
+                    // up
+                    if (keys[87] || keys[38] && players[i][1] >= canvas.height - 70) {
+                        players[i][2] = -3;
+                    }
                 } else {
                     if(players[i][0] > ballX) {
                         players[i][0]-=1
@@ -214,7 +227,14 @@
                         players[i][0]+=1
                     } 
                 }
-                rect(players[i][0], canvas.height - 75, 15, 25)
+                players[i][1]+=players[i][2]
+                if(players[i][1] < canvas.height - 70) {
+                    players[i][2]+=0.05
+                } else {
+                    players[i][1] = canvas.height - 70
+                    players[i][2] *= 0.3
+                }
+                rect(players[i][0], players[i][1], 15, 20)
             }
         }
         function updatePlay() {
