@@ -120,10 +120,21 @@
                 t();
             }
         }
-        
-        function drawMenu() {
+        function basketBallBG() {
             fill(194, 103, 0);
             rect(0, 0, canvas.width, canvas.height);
+            fill(184, 93, 0);
+            rect(canvas.width/2.54, canvas.height/5.00, canvas.width/20, canvas.height/30);
+            rect(canvas.width/1.15, canvas.height/1.54, canvas.width/20, canvas.height/30);
+            rect(canvas.width/4.25, canvas.height/3.68, canvas.width/20, canvas.height/30);
+            rect(canvas.width/2.47, canvas.height/1.78, canvas.width/20, canvas.height/30);
+            rect(canvas.width/1.16, canvas.height/4.03, canvas.width/20, canvas.height/30);
+            rect(canvas.width/4.52, canvas.height/1.15, canvas.width/20, canvas.height/30);
+            rect(canvas.width/1.46, canvas.height/1.18, canvas.width/20, canvas.height/30);
+            rect(canvas.width/5.23, canvas.height/2.05, canvas.width/20, canvas.height/30);
+        }
+        function drawMenu() {
+            basketBallBG()
             fill(0, 0, 0);
             textAlign("center");
             text("BasketBall", canvas.width/2, menu.BBy, 50);
@@ -178,8 +189,7 @@
         }
         
         function drawPlay() {
-            fill(194, 103, 0);
-            rect(0, 0, canvas.width, canvas.height);
+            basketBallBG()
             textAlign("center")
             fill(0, 0, 0)
             text(score[0] + "/" + score[1], canvas.width/2, 40, 40)
@@ -279,8 +289,7 @@
         }
         
         function drawHow() {
-            fill(194, 103, 0);
-            rect(0, 0, canvas.width, canvas.height);
+            basketBallBG()
             fill(0, 0, 0)
             button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
                     scene = "menu"
@@ -288,8 +297,7 @@
         }
         
         function drawCredits() {
-            fill(194, 103, 0);
-            rect(0, 0, canvas.width, canvas.height);
+            basketBallBG()
             fill(0, 0, 0)
             button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
                     scene = "menu"
