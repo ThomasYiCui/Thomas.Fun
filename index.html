@@ -24,6 +24,7 @@
         var mouseX = 0;
         var mouseY = 0;
         var clicked = false
+        var dragged = false
         var keys = [];
         function fill(r, g, b) {
             ctx.fillStyle = "rgb(" + r + ", " + g + ", " + b + ")";
@@ -73,14 +74,23 @@
             }
             return num
         }
+        function random(min, max) {
+            return min + Math.random(0, 1) * (max - min);
+        }
         canvas.addEventListener("mousemove", function(e) { 
             var cRect = canvas.getBoundingClientRect();
             mouseX = Math.round(e.clientX - cRect.left);
             mouseY = Math.round(e.clientY - cRect.top);
         });
         canvas.addEventListener("mousedown", function(e) {
-            clicked = true
+            dragged = true;
         }, false);
+        canvas.addEventListener("mouseup", function(e) {
+            if(dragged === true) {
+                clicked = true;
+                dragged = false;
+            }
+        })
         window.addEventListener("keydown", keysPressed, false);
         window.addEventListener("keyup", keysReleased, false);
         function keysPressed(e) {
@@ -101,11 +111,16 @@
             B2x: canvas.width + 10,
             B3x: -200,
         }
-        var score = [0, 0]
+        var score = 0
         var scene = "menu"
-        var players = []
-        var ballX = canvas.width/2
-        var ballY = canvas.height - 80
+        var player = {
+            
+        }
+        var hoopX = Math.round(random(100, canvas.width - 50));
+        var hoopY = Math.round(random(0, canvas.height - 150));
+        var ballX = 0;
+        var ballY = canvas.height - 80;
+        var ballGrab = true;
         var ballGrav = 0;
         var ballMom = 0;
         function floor(num) {
@@ -146,12 +161,10 @@
                         B2x: canvas.width + 10,
                         B3x: -200,
                     }
-                    players = []
-                    for(var i = 0; i < 5; i+=1) {
-                        players.push([35 + i * 20, canvas.height - 80, 0, false, 10, 20])
-                    }
-                    for(var i = 0; i < 5; i+=1) {
-                        players.push([canvas.width - (50 + i * 20), canvas.height - 80, 0, false, 10, -20])
+                    player = {
+                        x: 25,
+                        y: canvas.height - 70,
+                        color: "blue",
                     }
             }, ["Play", 30])
             button(menu.B2x, 175, 100, 50, function() {
@@ -192,100 +205,77 @@
             basketBallBG()
             textAlign("center")
             fill(0, 0, 0)
-            text(score[0] + "/" + score[1], canvas.width/2, 40, 40)
+            text(score, canvas.width/2, 40, 40)
             fill(143, 76, 1)
             rect(0, canvas.height - 50, canvas.width, 50)
             fill(235, 124, 0)
             ellipse(ballX, ballY, 10, 10, 0, 'brown');
-            fill(100, 100, 100)
-            rect(10, canvas.height - 150, 10, 100)
-            rect(canvas.width - 20, canvas.height - 150, 10, 100)
-            fill(255, 255, 255)
-            rect(10, canvas.height - 175, 10, 25)
-            rect(canvas.width - 20, canvas.height - 175, 10, 25)
+            fill(100, 100, 100);
+            rect(hoopX, hoopY, 20, 5);
+            fill(255, 255, 255);
+            rect(hoopX + 20, hoopY - 20, 5, 25);
+            
             if(ballY < canvas.height - 60) {
                 ballGrav+=0.01;
             } else {
                 ballGrav *= -0.3;
                 ballY = canvas.height - 60
+                ballMom*=0.98
+            }
+            if(ballGrab === true) {
+                ballX = player.x + 20;
+                ballY = player.y + 5;
+                ballGrav = 0;
+                if(clicked) {
+                    ballGrab = false;
+                    ballMom = -(player.x - mouseX)/200;
+                    ballGrav = -(player.y - mouseY)/100;
+                }
+                fill(100, 100, 100)
+                if(dragged) {
+                    var bx = ballX;
+                    var by = ballY;
+                    var bg = -(player.y - mouseY)/100;
+                    var bm = -(player.x - mouseX)/200;
+                    for(var i = 0; i < 100; i+=1) {
+                        if(by < canvas.height - 60) {
+                            bg+=0.01;
+                        } else {
+                            bg *= -0.3;
+                            by = canvas.height - 60
+                            bm*=0.98
+                        }
+                        by+=bg;
+                        bx+=bm;
+                        if(i % 10 === 0) {
+                            ellipse(bx, by, 5, 5, 0)
+                        }
+                    }
+                }
+            } else {
+                if(ballX + 3.25 > hoopX && ballX - 3.25 < hoopX + 20 && ballY + 3.25 > hoopY && ballY - 3.25 < hoopY + 5) {
+                    hoopX = Math.round(random(100, canvas.width - 50));
+                    hoopY = Math.round(random(0, canvas.height - 150));
+                    ballGrab = true;
+                    score += 1;
+                    ballMom = 0;
+                } else if(ballX + 3.25 > hoopX + 16.75 && ballX - 3.25 < hoopX + 25 && ballY + 3.25 > hoopY - 20 && ballY - 3.25 < hoopY + 5) {
+                        ballMom*=0.1;
+                        ballX = hoopX - 3.25;
+                        ballGrav*=0.95;
+                } else if(Math.abs(ballMom) + Math.abs(ballGrav) < 0.1 || ballX > 620 || ballX < -20) {
+                    ballGrab = true;
+                    ballMom = 0;
+                    ballGrav = 0;
+                    scene = "gameover"
+                }
             }
             ballY+=ballGrav;
             ballX+=ballMom;
-            for(var i = 0; i < players.length; i+=1) {
-                fill(252, 190, 121)
-                ellipse(players[i][0] + 7, players[i][1] - 10, 7.5, 7.5, 0, (252, 190, 121));
-                if(i < 5) {
-                    fill(0, 0, 255)
-                } else {
-                    fill(255, 0, 0)
-                }
-                if(i === 0) {
-                    fill(0, 100, 255)
-                    // left
-                    if (keys[65] || keys[37]) {
-                        players[i][0] -= 1;
-                        players[i][7] = -20
-                    }
-                 
-                    // right
-                    if (keys[68] || keys[39]) {
-                        players[i][0] += 1;
-                        players[i][7] = 20
-                    }
-                    
-                    // up
-                    if (keys[87]  && players[i][1] >= canvas.height - 70 || keys[38] && players[i][1] >= canvas.height - 70) {
-                        players[i][2] = -3;
-                    }
-                } else {
-                    if(players[i][0] > ballX) {
-                        players[i][0]-=1
-                        players[i][7] = 20
-                    } else if(players[i][0] < ballX) {
-                        players[i][0]+=1
-                        players[i][7] = -20
-                    } 
-                }
-                players[i][1]+=players[i][2]
-                if(players[i][1] < canvas.height - 70) {
-                    players[i][2]+=0.05
-                } else {
-                    players[i][1] = canvas.height - 70
-                    players[i][2] *= 0.3
-                }
-                if(players[i][0] > ballX && players[i][0] < ballX + 25) {
-                    players[i][5] = true
-                }
-                if(players[i][5] === true) {
-                    ballX = players[i][0] - players[i][7]
-                    if(keys[80]) {
-                        ballX = players[0][0]
-                    }
-                }
-                players[i][0] = constrain(players[i][0], 0, canvas.width - 15)
-                players[i][6]-=1
-                for(var j = 0; j < players.length; j+=1) {
-                    if(players[j][0] >= players[i][0] && players[j][0] < players[i][0] + 15 && players[j][1] >= players[i][1] && players[j][1] < players[i][1] + 20 && i !== j) {
-                        if(players[i][0] < players[j][0]){
-                            players[i][0]-=(7.5 - (players[i][0] + 7.5 - (players[j][0] + 7.5)))/8
-                            players[j][0]-=(7.5 - (players[j][0] + 7.5 - (players[i][0] + 7.5)))/8
-                        } else {
-                            players[i][0]+=(7.5 - (players[i][0] + 7.5 - (players[j][0] + 7.5)))/8
-                            players[j][0]+=(7.5 - (players[j][0] + 7.5 - (players[i][0] + 7.5)))/8
-                        }
-                        if(players[i][5] === true && players[j][6] <= 0) {
-                            players[j][5] = false
-                            player[i][5] = true
-                            players[j][6] = 15
-                        } else if(players[j][5] === true && players[i][6] <= 0) {
-                            players[i][5] = true
-                            players[j][5] = false
-                            players[i][6] = 15
-                        }
-                    }
-                }
-                rect(players[i][0], players[i][1], 15, 20)
-            }
+            fill(0, 0, 255);
+            rect(player.x, player.y, 15, 20);
+            fill(255, 215, 171)
+            ellipse(player.x + 7.5, player.y - 8, 7.5, 7.5, 0)
         }
         
         function drawHow() {
@@ -303,6 +293,16 @@
                     scene = "menu"
             }, ["Back", 30])
         }
+        function drawGameover() {
+            basketBallBG()
+            fill(0, 0, 0)
+            text("U miss Lul", canvas.width/2, 100, 30)
+            text("At least you got " + score, canvas.width/2, 150, 20)
+            button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
+                    scene = "menu"
+                    score = 0;
+            }, ["Back", 30])
+        }
         function draw() { 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             switch(scene) {
@@ -318,6 +318,9 @@
                 break;
                 case "credits":
                     drawCredits()
+                break;
+                case "gameover":
+                    drawGameover();
                 break;
             }
             clicked = false;
