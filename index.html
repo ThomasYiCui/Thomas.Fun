@@ -111,6 +111,10 @@
             B2x: canvas.width + 10,
             B3x: -200,
         }
+        var gameover = {
+            By: canvas.height + 50,
+            Ty: -75,
+        }
         var score = 0
         var scene = "menu"
         var player = {
@@ -296,12 +300,21 @@
         function drawGameover() {
             basketBallBG()
             fill(0, 0, 0)
-            text("U miss Lul", canvas.width/2, 100, 30)
-            text("At least you got " + score, canvas.width/2, 150, 20)
-            button(canvas.width/2 - 50, canvas.height - 100, 100, 50, function() {
+            text("U miss Lul", canvas.width/2, gameover.Ty, 30)
+            text("At least you got " + score, canvas.width/2, gameover.Ty + 50, 20)
+            button(canvas.width/2 - 50, gameover.By, 100, 50, function() {
                     scene = "menu"
                     score = 0;
+                    gameover = {
+                        By: canvas.height + 50,
+                        Ty: -70,
+                    }
             }, ["Back", 30])
+            gameover.Ty = lerp(gameover.Ty, 100, 0.01);
+            if(gameover.Ty > 99) {
+                gameover.By = lerp(gameover.By, canvas.height - 100, 0.01);
+            }
+            
         }
         function draw() { 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
