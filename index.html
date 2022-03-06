@@ -267,7 +267,7 @@
                         ballMom*=0.1;
                         ballX = hoopX - 3.25;
                         ballGrav*=0.95;
-                } else if(Math.abs(ballMom) + Math.abs(ballGrav) < 0.1 || ballX > 620 || ballX < -20) {
+                } else if(Math.abs(ballMom) + Math.abs(ballGrav) < 0.1 || ballX > canvas.width + 20 || ballX < -20) {
                     ballGrab = true;
                     ballMom = 0;
                     ballGrav = 0;
